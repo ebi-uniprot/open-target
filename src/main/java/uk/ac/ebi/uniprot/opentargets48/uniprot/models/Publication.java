@@ -1,11 +1,11 @@
 package uk.ac.ebi.uniprot.opentargets48.uniprot.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.Value;
+import lombok.Data;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Value
+@Data
 public class Publication {
-    String Id;
-    String name;
+  String Id;
+  String name;
 }

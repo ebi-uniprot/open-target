@@ -11,10 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
-import uk.ac.ebi.kraken.interfaces.uniprot.UniProtEntry;
 import uk.ac.ebi.uniprot.dataservice.client.Client;
 import uk.ac.ebi.uniprot.dataservice.client.ServiceFactory;
-import uk.ac.ebi.uniprot.opentargets48.uniprot.models.Protein;
+import uk.ac.ebi.uniprot.opentargets48.common.models.OTARProteinEntry;
+import uk.ac.ebi.uniprot.opentargets48.uniprot.models.UniProtEntry;
 import uk.ac.ebi.uniprot.opentargets48.uniprot.processors.UniProtEntryProcessor;
 import uk.ac.ebi.uniprot.opentargets48.uniprot.readers.UniProtEntryReader;
 import uk.ac.ebi.uniprot.opentargets48.uniprot.writers.JsonItemWriter;
@@ -53,8 +53,8 @@ public class UniProtConfig {
     protected Step processEntries(
             UniProtEntryReader reader,
             UniProtEntryProcessor processor,
-            ItemWriter<Protein> writer) {
-        return steps.get("uniProtEntries").<UniProtEntry, Protein> chunk(DEFAULT_CHUNK_SIZE)
+            ItemWriter<OTARProteinEntry> writer) {
+        return steps.get("uniProtEntries").<UniProtEntry, OTARProteinEntry> chunk(DEFAULT_CHUNK_SIZE)
                 .reader(reader)
                 .processor(processor)
                 .writer(writer)

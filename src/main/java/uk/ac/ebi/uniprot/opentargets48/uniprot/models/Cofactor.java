@@ -1,15 +1,14 @@
 package uk.ac.ebi.uniprot.opentargets48.uniprot.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.Value;
+import java.util.List;
+import lombok.Data;
 import uk.ac.ebi.uniprot.services.data.serializer.model.ref.Publication;
 
-import java.util.List;
-
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Value
+@Data
 public class Cofactor {
-    String value;
-    List<CrossRef> crossRefs;
-    List<Publication> publications;
+  String value;
+  List<CrossRef> crossRefs;
+  List<Publication> publications;
 }
