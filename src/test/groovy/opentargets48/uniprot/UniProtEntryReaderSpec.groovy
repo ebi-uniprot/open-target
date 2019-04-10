@@ -18,13 +18,25 @@ class UniProtEntryReaderSpec extends Specification {
 
     def "should call uniprot service"() {
         given:
-            reader = new UniProtEntryReader(mockService)
-            Query query = reader.getQuery()
+        reader = new UniProtEntryReader(mockService)
+        Query query = reader.getQuery()
 
         when:
-            reader.read()
+        reader.read()
 
         then:
-            1 * mockService.getEntries(query) >> mockQueryResult
+        1 * mockService.getEntries(query) >> mockQueryResult
+    }
+
+    def "should return uniprot data"() {
+        given:
+        reader = new UniProtEntryReader(mockService)
+        Query query = reader.getQuery()
+
+        when:
+        reader.read()
+
+        then:
+        1 * mockService.getEntries(query) >> mockQueryResult
     }
 }

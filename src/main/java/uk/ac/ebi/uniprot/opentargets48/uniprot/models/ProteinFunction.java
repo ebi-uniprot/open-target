@@ -1,12 +1,10 @@
 package uk.ac.ebi.uniprot.opentargets48.uniprot.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.Value;
-
+import lombok.Data;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Value
-public class Protein {
-    private String Id;
-    private String accession;
+@Data
+public class ProteinFunction {
+  private final String text;
 }
