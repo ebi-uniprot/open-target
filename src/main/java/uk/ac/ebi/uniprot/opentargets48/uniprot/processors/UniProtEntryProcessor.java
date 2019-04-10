@@ -1,6 +1,5 @@
 package uk.ac.ebi.uniprot.opentargets48.uniprot.processors;
 
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.ItemProcessor;
 import uk.ac.ebi.uniprot.opentargets48.common.models.OTARProteinEntry;
@@ -11,18 +10,16 @@ public class UniProtEntryProcessor implements ItemProcessor<UniProtEntry, OTARPr
 
   public OTARProteinEntry process(UniProtEntry entry) {
     log.debug("Processing data");
-    String id = entry.getId();
-    String accession = entry.getAccession();
-    return createProteinEntry(id, accession, entry.getFunctions(), entry.getComplexIds());
+    return createProteinEntry(entry);
   }
 
-  private OTARProteinEntry createProteinEntry(
-      String id, String accession, List<String> functions, List<String> complexIds) {
+  private OTARProteinEntry createProteinEntry(UniProtEntry entry) {
     OTARProteinEntry.Builder builder =
-        new OTARProteinEntry.Builder(id)
-            .withAccession(accession)
-            .withFunctions(functions)
-            .withComplexIds(complexIds);
+        new OTARProteinEntry.Builder(entry.getId())
+            .withAccession(entry.getAccession())
+            .withFunctions(entry.getFunctions())
+            .withComplexIds(entry.getComplexIds())
+            .withActivities(entry.getCatalyticActivities());
     return builder.build();
   }
 }

@@ -7,8 +7,8 @@ import lombok.Data;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 public class CatalyticAcitivity {
-  String type;
-  String name;
-  String ecNumber;
-  List<CrossRef> crossRefs;
+  private final String type;
+  private final String name;
+  private final String ecNumber;
+  private final List<CrossRef> crossRefs;
 }
