@@ -1,37 +1,29 @@
 package uk.ac.ebi.uniprot.opentargets48.uniprot.readers;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.ItemReader;
-import uk.ac.ebi.kraken.interfaces.uniprot.DatabaseCrossReference;
-import uk.ac.ebi.kraken.interfaces.uniprot.DatabaseType;
-import uk.ac.ebi.kraken.interfaces.uniprot.comments.Comment;
+import uk.ac.ebi.kraken.interfaces.uniprot.UniProtEntry;
 import uk.ac.ebi.kraken.interfaces.uniprot.comments.CommentType;
-import uk.ac.ebi.kraken.interfaces.uniprot.comments.ReactionReference;
-import uk.ac.ebi.kraken.model.uniprot.comments.CatalyticActivityCommentStructuredImpl;
-import uk.ac.ebi.kraken.model.uniprot.comments.FunctionCommentImpl;
 import uk.ac.ebi.uniprot.dataservice.client.exception.ServiceException;
 import uk.ac.ebi.uniprot.dataservice.client.uniprot.UniProtQueryBuilder;
 import uk.ac.ebi.uniprot.dataservice.client.uniprot.UniProtService;
 import uk.ac.ebi.uniprot.dataservice.query.Query;
-import uk.ac.ebi.uniprot.opentargets48.uniprot.models.UniProtEntry;
+import uk.ac.ebi.uniprot.opentargets48.uniprot.models.OTARUniProtEntry;
+import uk.ac.ebi.uniprot.opentargets48.uniprot.models.UniProtEntryBuilder;
 
 @Slf4j
-public class UniProtEntryReader implements ItemReader<UniProtEntry> {
+public class UniProtEntryReader implements ItemReader<OTARUniProtEntry> {
   static final int HUMAN_TAXONOMY_ID = 9606;
   private final UniProtService service;
-  private Iterator<uk.ac.ebi.kraken.interfaces.uniprot.UniProtEntry> iterator;
+  private Iterator<UniProtEntry> iterator;
 
   public UniProtEntryReader(UniProtService service) {
     this.service = service;
   }
 
   @Override
-  public UniProtEntry read() throws ServiceException {
+  public OTARUniProtEntry read() throws ServiceException {
     if (iterator == null) {
       iterator = entries();
     }
@@ -49,53 +41,27 @@ public class UniProtEntryReader implements ItemReader<UniProtEntry> {
             UniProtQueryBuilder.comments(CommentType.COFACTOR, "*")
                 .or(UniProtQueryBuilder.comments(CommentType.FUNCTION, "*"))
                 .or(UniProtQueryBuilder.comments(CommentType.CATALYTIC_ACTIVITY, "*"))
-                .or(UniProtQueryBuilder.comments(CommentType.BIOPHYSICOCHEMICAL_PROPERTIES, "*")));
+                .or(UniProtQueryBuilder.comments(CommentType.BIOPHYSICOCHEMICAL_PROPERTIES, "*")))
+        .and(UniProtQueryBuilder.accession("P27815"));
+    // .and(UniProtQueryBuilder.accession("P69892"));
   }
 
-  private Iterator<uk.ac.ebi.kraken.interfaces.uniprot.UniProtEntry> entries()
-      throws ServiceException {
-    log.debug("Reading data");
+  private Iterator<UniProtEntry> entries() throws ServiceException {
     service.start();
     return service.getEntries(getQuery());
   }
 
-  private UniProtEntry convert(uk.ac.ebi.kraken.interfaces.uniprot.UniProtEntry entry) {
+  private OTARUniProtEntry convert(UniProtEntry entry) {
     String id = entry.getUniProtId().toString();
     String accession = entry.getPrimaryUniProtAccession().toString();
-    List<Comment> functions = entry.getComments(CommentType.FUNCTION);
-    List<String> fs = new ArrayList<>();
-    for (Comment f : functions) {
-      fs.add(((FunctionCommentImpl) f).getValue());
-    }
-    List<Comment> catalyticActivities = entry.getComments(CommentType.CATALYTIC_ACTIVITY);
-    List<Map<String, String>> cas = new ArrayList<>();
-    for (Comment c : catalyticActivities) {
-      CatalyticActivityCommentStructuredImpl fc = (CatalyticActivityCommentStructuredImpl) c;
-      Map<String, String> activity = new HashMap<>();
-      activity.put("type", "reaction");
-      activity.put("name", fc.getReaction().getName());
-      activity.put("ecNumber", fc.getReaction().getECNumber());
-      activity.put("references", getReferences(fc.getReaction().getReactionReferences()));
-      cas.add(activity);
-    }
-    List<DatabaseCrossReference> references =
-        entry.getDatabaseCrossReferences(DatabaseType.COMPLEXPORTAL);
-    List<String> dbs = new ArrayList<>();
-    for (DatabaseCrossReference r : references) {
-      dbs.add(r.getDatabase().getName());
-    }
 
-    return new UniProtEntry(id, accession, fs, cas, dbs);
-  }
-
-  private String getReferences(List<ReactionReference> references) {
-    StringBuilder sb = new StringBuilder();
-    for (ReactionReference reference : references) {
-      sb.append(reference.getId());
-      sb.append("-");
-      sb.append(reference.getType());
-      sb.append(",");
-    }
-    return sb.toString();
+    return new UniProtEntryBuilder(id, accession)
+        .withFunctions(entry)
+        .withComplexIds(entry)
+        .withCatalyticActivities(entry)
+        .withEnzymeRegulations(entry)
+        .withBpcProperties(entry)
+        .withCofactors(entry)
+        .build();
   }
 }

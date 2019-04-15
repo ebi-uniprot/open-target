@@ -6,7 +6,7 @@ import uk.ac.ebi.uniprot.dataservice.client.uniprot.UniProtService
 import uk.ac.ebi.uniprot.dataservice.query.Query
 import uk.ac.ebi.uniprot.opentargets48.uniprot.readers.UniProtEntryReader;
 
-class UniProtEntryReaderSpec extends Specification {
+class OTARUniProtEntryReaderSpec extends Specification {
     UniProtEntryReader reader
     UniProtService mockService;
     QueryResult mockQueryResult;
