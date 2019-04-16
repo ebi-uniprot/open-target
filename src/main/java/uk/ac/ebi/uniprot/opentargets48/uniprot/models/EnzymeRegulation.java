@@ -1,7 +1,7 @@
 package uk.ac.ebi.uniprot.opentargets48.uniprot.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import lombok.Builder;
 import lombok.Data;
 
@@ -10,5 +10,5 @@ import lombok.Data;
 @Builder
 public class EnzymeRegulation {
   private String text;
-  private List<Publication> publications;
+  @JsonUnwrapped private Publications publications;
 }

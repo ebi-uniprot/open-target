@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import lombok.Data;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -13,14 +14,10 @@ import lombok.Data;
 public class CrossRefs {
   private final List<CrossRef> xrefs;
 
-  public static final CrossRefs from(List<String> refs) {
+  public static final CrossRefs from(List<Map<String, String>> refs) {
     List<CrossRef> xrefs = new ArrayList<>();
-    for (String ref : refs) {
-      if (ref.indexOf('-') >= 0) {
-        xrefs.add(new CrossRef(ref.split("-")[0], ref.split("-")[1]));
-      } else {
-        xrefs.add(new CrossRef(ref, ref));
-      }
+    for (Map<String, String> ref : refs) {
+      xrefs.add(CrossRef.from(ref));
     }
     return new CrossRefs(xrefs);
   }

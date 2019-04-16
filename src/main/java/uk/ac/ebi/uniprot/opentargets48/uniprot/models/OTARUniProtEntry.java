@@ -10,7 +10,7 @@ public class OTARUniProtEntry {
   private final String accession;
   private final List<String> complexIds;
   private final List<Map<String, Object>> functions;
-  private final List<Map<String, String>> catalyticActivities;
+  private final List<Map<String, Object>> catalyticActivities;
   private final List<Map<String, Object>> enzymeRegulations;
   private final List<Map<String, Object>> bpcProperties;
   private final Map<String, Object> cofactorGroup;
@@ -20,7 +20,7 @@ public class OTARUniProtEntry {
       String accession,
       List<String> complexIds,
       List<Map<String, Object>> functions,
-      List<Map<String, String>> catalyticActivities,
+      List<Map<String, Object>> catalyticActivities,
       List<Map<String, Object>> enzymeRegulations,
       List<Map<String, Object>> bpcProperties,
       Map<String, Object> cofactorGroup) {

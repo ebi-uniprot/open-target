@@ -1,7 +1,7 @@
 package uk.ac.ebi.uniprot.opentargets48.uniprot.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import java.util.ArrayList;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import java.util.List;
 import java.util.Map;
 import lombok.Data;
@@ -12,18 +12,13 @@ public class CatalyticAcitivity {
   private final String type;
   private final String name;
   private final String ecNumber;
-  private final List<CrossRef> crossRefs;
+  @JsonUnwrapped private final CrossRefs crossRefs;
 
-  public static CatalyticAcitivity from(Map<String, String> activity) {
-    List<CrossRef> refs = new ArrayList<>();
-    for (String ref : activity.get("references").split(",")) {
-      if (ref.indexOf('-') >= 0) {
-        refs.add(new CrossRef(ref.split("-")[0], ref.split("-")[1]));
-      } else {
-        refs.add(new CrossRef(ref, ref));
-      }
-    }
-    return new CatalyticAcitivity(
-        activity.get("type"), activity.get("name"), activity.get("ecNumber"), refs);
+  public static CatalyticAcitivity from(Map<String, Object> activity) {
+    CrossRefs xrefs = CrossRefs.from((List<Map<String, String>>) activity.get("xrefs"));
+    String type = (String) activity.get("type");
+    String name = (String) activity.get("name");
+    String ecNumber = (String) activity.get("ecNumber");
+    return new CatalyticAcitivity(type, name, ecNumber, xrefs);
   }
 }

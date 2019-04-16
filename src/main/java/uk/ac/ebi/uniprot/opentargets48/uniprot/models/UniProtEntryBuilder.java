@@ -18,7 +18,6 @@ import uk.ac.ebi.kraken.interfaces.uniprot.evidences.EvidenceId;
 import uk.ac.ebi.kraken.model.uniprot.comments.BioPhysicoChemicalPropertiesCommentImpl;
 import uk.ac.ebi.kraken.model.uniprot.comments.CatalyticActivityCommentStructuredImpl;
 import uk.ac.ebi.kraken.model.uniprot.comments.CofactorCommentStructuredImpl;
-import uk.ac.ebi.kraken.model.uniprot.comments.CofactorImpl;
 import uk.ac.ebi.kraken.model.uniprot.comments.EnzymeRegulationCommentImpl;
 import uk.ac.ebi.kraken.model.uniprot.comments.FunctionCommentImpl;
 import uk.ac.ebi.kraken.model.uniprot.comments.KineticParametersImpl;
@@ -28,7 +27,7 @@ public class UniProtEntryBuilder {
   private String accession;
   private List<String> complexIds = new ArrayList<>();
   private List<Map<String, Object>> functions = new ArrayList<>();
-  private List<Map<String, String>> catalyticActivities = new ArrayList<>();
+  private List<Map<String, Object>> catalyticActivities = new ArrayList<>();
   private List<Map<String, Object>> enzymeRegulations = new ArrayList<>();
   private List<Map<String, Object>> bpcProperties = new ArrayList<>();
   private Map<String, Object> cofactorGroup = new HashMap<>();
@@ -60,11 +59,11 @@ public class UniProtEntryBuilder {
   public UniProtEntryBuilder withCatalyticActivities(UniProtEntry entry) {
     for (Comment c : entry.getComments(CommentType.CATALYTIC_ACTIVITY)) {
       CatalyticActivityCommentStructuredImpl fc = (CatalyticActivityCommentStructuredImpl) c;
-      Map<String, String> activity = new HashMap<>();
+      Map<String, Object> activity = new HashMap<>();
       activity.put("type", "reaction");
       activity.put("name", fc.getReaction().getName());
       activity.put("ecNumber", fc.getReaction().getECNumber());
-      activity.put("references", getReferences(fc.getReaction().getReactionReferences()));
+      activity.put("xrefs", getReferences(fc.getReaction().getReactionReferences()));
       this.catalyticActivities.add(activity);
     }
     return this;
@@ -118,14 +117,14 @@ public class UniProtEntryBuilder {
     for (Comment comment : comments) {
       for (Cofactor cofactor : ((CofactorCommentStructuredImpl) comment).getCofactors()) {
         Map<String, Object> inner = new HashMap<>();
-        inner.put("name", cofactor.getName());
-        List<String> xrefs = new ArrayList<>();
-        xrefs.add(
-            cofactor.getCofactorReference().getReferenceId()
-                + "-"
-                + cofactor.getCofactorReference().getCofactorReferenceType().name());
+        inner.put("value", cofactor.getName());
+        List<Map<String, String>> xrefs = new ArrayList<>();
+        xrefs.add(new HashMap<String, String>(){{
+          put("Id", cofactor.getCofactorReference().getReferenceId());
+          put("name", cofactor.getCofactorReference().getCofactorReferenceType().name());
+        }});
         inner.put("xrefs", xrefs);
-        inner.put("publications", getEvidences(cofactor.getEvidenceIds()));
+        inner.put("evidences", getEvidences(cofactor.getEvidenceIds()));
         cofactorList.add(inner);
       }
       this.cofactorGroup.put("cofactors", cofactorList);
@@ -134,7 +133,7 @@ public class UniProtEntryBuilder {
       for (EvidencedValue ev : ((CofactorCommentStructuredImpl) comment).getNote().getTexts()) {
         Map<String, Object> map = new HashMap<>();
         map.put("text", ev.getValue());
-        map.put("publications", getEvidences(ev.getEvidenceIds()));
+        map.put("evidences", getEvidences(ev.getEvidenceIds()));
         notes.add(map);
       }
       this.cofactorGroup.put("notes", notes);
@@ -166,14 +165,14 @@ public class UniProtEntryBuilder {
     return evidences;
   }
 
-  private String getReferences(List<ReactionReference> references) {
-    StringBuilder sb = new StringBuilder();
+  private List<Map<String, String>> getReferences(List<ReactionReference> references) {
+    List<Map<String, String>> xrefs = new ArrayList<>();
     for (ReactionReference reference : references) {
-      sb.append(reference.getId());
-      sb.append("-");
-      sb.append(reference.getType());
-      sb.append(",");
+      Map<String, String> ref = new HashMap<>();
+      ref.put("Id", reference.getId());
+      ref.put("name", reference.getType().name());
+      xrefs.add(ref);
     }
-    return sb.toString();
+    return xrefs;
   }
 }
