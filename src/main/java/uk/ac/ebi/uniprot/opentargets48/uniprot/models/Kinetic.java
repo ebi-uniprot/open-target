@@ -1,12 +1,12 @@
 package uk.ac.ebi.uniprot.opentargets48.uniprot.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnoreType;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import lombok.Data;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonIgnoreType()
 @Data
-public class ProteinFunction {
-  private final String text;
+public class Kinetic {
+  private final String value;
   @JsonUnwrapped private final Publications publications;
 }

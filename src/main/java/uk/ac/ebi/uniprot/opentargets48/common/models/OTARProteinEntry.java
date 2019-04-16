@@ -2,37 +2,46 @@ package uk.ac.ebi.uniprot.opentargets48.common.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonIgnoreType;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.Data;
-import uk.ac.ebi.uniprot.opentargets48.uniprot.models.CatalyticAcitivity;
-import uk.ac.ebi.uniprot.opentargets48.uniprot.models.Complex;
-import uk.ac.ebi.uniprot.opentargets48.uniprot.models.CrossRef;
-import uk.ac.ebi.uniprot.opentargets48.uniprot.models.ProteinFunction;
+import uk.ac.ebi.uniprot.opentargets48.uniprot.models.BiophysicochemicalProperties;
+import uk.ac.ebi.uniprot.opentargets48.uniprot.models.CatalyticActivities;
+import uk.ac.ebi.uniprot.opentargets48.uniprot.models.CofactorGroup;
+import uk.ac.ebi.uniprot.opentargets48.uniprot.models.Complexes;
+import uk.ac.ebi.uniprot.opentargets48.uniprot.models.EnzymeRegulations;
+import uk.ac.ebi.uniprot.opentargets48.uniprot.models.Kinetic;
+import uk.ac.ebi.uniprot.opentargets48.uniprot.models.ProteinFunctions;
+import uk.ac.ebi.uniprot.opentargets48.uniprot.models.Publications;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 public class OTARProteinEntry {
   private String Id;
   private String accession;
-  private List<ProteinFunction> functions;
-  private List<Complex> complexIds;
-  private List<CatalyticAcitivity> activities;
+  private List<BiophysicochemicalProperties> biophysicochemicalProperties = new ArrayList<>();
+  @JsonUnwrapped private ProteinFunctions functions;
+  @JsonUnwrapped private Complexes complexIds;
+  @JsonUnwrapped private EnzymeRegulations enzymeRegulations;
+  @JsonUnwrapped private CatalyticActivities catalyticAcitivities;
+  private CofactorGroup cofactorGroups;
 
   @JsonIgnoreType
   public static class Builder {
     private String Id;
     private String accession;
-    private List<Map<String, String>> activities;
-    private List<String> functions;
-    private List<String> complexIds;
+    private List<String> complexIds = new ArrayList<>();
+    private List<Map<String, Object>> activities = new ArrayList<>();
+    private List<Map<String, Object>> functions = new ArrayList<>();
+    private List<Map<String, Object>> enzymeRegulations = new ArrayList<>();
+    private List<Map<String, Object>> bpcProperties = new ArrayList<>();
+    private Map<String, Object> cofactorGroup = new HashMap<>();
 
     public Builder(String Id) {
       this.Id = Id;
-      this.activities = new ArrayList<>();
-      this.functions = new ArrayList<>();
-      this.complexIds = new ArrayList<>();
     }
 
     public Builder withAccession(String accession) {
@@ -40,7 +49,7 @@ public class OTARProteinEntry {
       return this;
     }
 
-    public Builder withFunctions(List<String> functions) {
+    public Builder withFunctions(List<Map<String, Object>> functions) {
       this.functions.addAll(functions);
       return this;
     }
@@ -50,8 +59,23 @@ public class OTARProteinEntry {
       return this;
     }
 
-    public Builder withActivities(List<Map<String, String>> activities) {
+    public Builder withActivities(List<Map<String, Object>> activities) {
       this.activities.addAll(activities);
+      return this;
+    }
+
+    public Builder withEnzymeRegulations(List<Map<String, Object>> regulations) {
+      this.enzymeRegulations.addAll(regulations);
+      return this;
+    }
+
+    public Builder withBpcProperties(List<Map<String, Object>> properties) {
+      this.bpcProperties.addAll(properties);
+      return this;
+    }
+
+    public Builder withCofactors(Map<String, Object> cofactorGroup) {
+      this.cofactorGroup = cofactorGroup;
       return this;
     }
 
@@ -59,32 +83,38 @@ public class OTARProteinEntry {
       OTARProteinEntry entry = new OTARProteinEntry();
       entry.Id = this.Id;
       entry.accession = this.accession;
-      entry.functions = new ArrayList<>();
-      for (String function : this.functions) {
-        entry.functions.add(new ProteinFunction(function));
+      for (Map<String, Object> property : this.bpcProperties) {
+        entry.biophysicochemicalProperties.add(createBpcProperty(property));
       }
-      entry.complexIds = new ArrayList<>();
-      for (String Id : this.complexIds) {
-        entry.complexIds.add(new Complex(Id));
-      }
-      entry.activities = new ArrayList<>();
-      for (Map<String, String> activity : this.activities) {
-        entry.activities.add(createCatalyticActivity(activity));
-      }
+      entry.functions = ProteinFunctions.from(this.functions);
+      entry.complexIds = Complexes.from(this.complexIds);
+      entry.enzymeRegulations = EnzymeRegulations.from(this.enzymeRegulations);
+      entry.catalyticAcitivities = CatalyticActivities.from(this.activities);
+      entry.cofactorGroups = CofactorGroup.from(this.cofactorGroup);
       return entry;
     }
 
-    private CatalyticAcitivity createCatalyticActivity(Map<String, String> activity) {
-      List<CrossRef> refs = new ArrayList<>();
-      for (String ref : activity.get("references").split(",")) {
-        if (ref.indexOf('-') >= 0) {
-          refs.add(new CrossRef(ref.split("-")[0], ref.split("-")[1]));
-        } else {
-          refs.add(new CrossRef(ref, ref));
-        }
+    private BiophysicochemicalProperties createBpcProperty(Map<String, Object> property) {
+      return BiophysicochemicalProperties.builder()
+          .type((String) property.get("type"))
+          .kinetics(
+              new HashMap<String, List<Kinetic>>() {
+                {
+                  put("km", getKinetics((List<Map<String, Object>>) property.get("km")));
+                }
+              })
+          .build();
+    }
+
+    private List<Kinetic> getKinetics(List<Map<String, Object>> kinetics) {
+      List<Kinetic> result = new ArrayList<>();
+      for (Map<String, Object> kinetic : kinetics) {
+        String value = (String) kinetic.get("value");
+        Publications publications =
+            Publications.from((List<Map<String, String>>) kinetic.get("evidences"));
+        result.add(new Kinetic(value, publications));
       }
-      return new CatalyticAcitivity(
-          activity.get("type"), activity.get("name"), activity.get("ecNumber"), refs);
+      return result;
     }
   }
 

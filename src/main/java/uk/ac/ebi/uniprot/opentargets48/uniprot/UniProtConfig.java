@@ -14,7 +14,7 @@ import org.springframework.core.io.ClassPathResource;
 import uk.ac.ebi.uniprot.dataservice.client.Client;
 import uk.ac.ebi.uniprot.dataservice.client.ServiceFactory;
 import uk.ac.ebi.uniprot.opentargets48.common.models.OTARProteinEntry;
-import uk.ac.ebi.uniprot.opentargets48.uniprot.models.UniProtEntry;
+import uk.ac.ebi.uniprot.opentargets48.uniprot.models.OTARUniProtEntry;
 import uk.ac.ebi.uniprot.opentargets48.uniprot.processors.UniProtEntryProcessor;
 import uk.ac.ebi.uniprot.opentargets48.uniprot.readers.UniProtEntryReader;
 import uk.ac.ebi.uniprot.opentargets48.uniprot.writers.JsonItemWriter;
@@ -54,7 +54,7 @@ public class UniProtConfig {
             UniProtEntryReader reader,
             UniProtEntryProcessor processor,
             ItemWriter<OTARProteinEntry> writer) {
-        return steps.get("uniProtEntries").<UniProtEntry, OTARProteinEntry> chunk(DEFAULT_CHUNK_SIZE)
+        return steps.get("uniProtEntries").<OTARUniProtEntry, OTARProteinEntry> chunk(DEFAULT_CHUNK_SIZE)
                 .reader(reader)
                 .processor(processor)
                 .writer(writer)
