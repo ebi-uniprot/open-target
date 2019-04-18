@@ -34,19 +34,23 @@ public class CofactorGroup {
     List<Map<String, Object>> notes = (List<Map<String, Object>>) cofactorGroup.get("notes");
 
     List<Cofactor> cfs = new ArrayList<>();
-    for (Map<String, Object> cofactor : cofactors) {
-      String text = (String) cofactor.get("value");
-      CrossRefs xrefs = CrossRefs.from((List<Map<String, String>>) cofactor.get("xrefs"));
-      Publications publications =
-          Publications.from((List<Map<String, String>>) cofactor.get("evidences"));
-      cfs.add(new Cofactor(text, xrefs, publications));
+    if (cofactors != null) {
+      for (Map<String, Object> cofactor : cofactors) {
+        String text = (String) cofactor.get("value");
+        CrossRefs xrefs = CrossRefs.from((List<Map<String, String>>) cofactor.get("xrefs"));
+        Publications publications =
+            Publications.from((List<Map<String, String>>) cofactor.get("evidences"));
+        cfs.add(new Cofactor(text, xrefs, publications));
+      }
     }
 
     List<CofactorNote> cofactorNotes = new ArrayList<>();
-    for (Map<String, Object> note : notes) {
-      Publications publications =
-          Publications.from((List<Map<String, String>>) note.get("evidences"));
-      cofactorNotes.add(new CofactorNote((String) note.get("text"), publications));
+    if (notes != null) {
+      for (Map<String, Object> note : notes) {
+        Publications publications =
+            Publications.from((List<Map<String, String>>) note.get("evidences"));
+        cofactorNotes.add(new CofactorNote((String) note.get("text"), publications));
+      }
     }
     return new CofactorGroup(cfs, cofactorNotes);
   }

@@ -8,12 +8,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.Data;
+import uk.ac.ebi.uniprot.opentargets48.interpro.models.ProteinFamilies;
+import uk.ac.ebi.uniprot.opentargets48.interpro.models.ProteinFamily;
 import uk.ac.ebi.uniprot.opentargets48.uniprot.models.BiophysicochemicalProperties;
 import uk.ac.ebi.uniprot.opentargets48.uniprot.models.CatalyticActivities;
 import uk.ac.ebi.uniprot.opentargets48.uniprot.models.CofactorGroup;
 import uk.ac.ebi.uniprot.opentargets48.uniprot.models.Complexes;
 import uk.ac.ebi.uniprot.opentargets48.uniprot.models.EnzymeRegulations;
 import uk.ac.ebi.uniprot.opentargets48.uniprot.models.Kinetic;
+import uk.ac.ebi.uniprot.opentargets48.uniprot.models.OTARProteinFamilies;
 import uk.ac.ebi.uniprot.opentargets48.uniprot.models.ProteinFunctions;
 import uk.ac.ebi.uniprot.opentargets48.uniprot.models.Publications;
 
@@ -27,6 +30,7 @@ public class OTARProteinEntry {
   @JsonUnwrapped private Complexes complexIds;
   @JsonUnwrapped private EnzymeRegulations enzymeRegulations;
   @JsonUnwrapped private CatalyticActivities catalyticAcitivities;
+  @JsonUnwrapped private OTARProteinFamilies families;
   private CofactorGroup cofactorGroups;
 
   @JsonIgnoreType
@@ -39,6 +43,7 @@ public class OTARProteinEntry {
     private List<Map<String, Object>> enzymeRegulations = new ArrayList<>();
     private List<Map<String, Object>> bpcProperties = new ArrayList<>();
     private Map<String, Object> cofactorGroup = new HashMap<>();
+    private ProteinFamilies families;
 
     public Builder(String Id) {
       this.Id = Id;
@@ -79,6 +84,11 @@ public class OTARProteinEntry {
       return this;
     }
 
+    public Builder withFamilies(ProteinFamilies families) {
+      this.families = families;
+      return this;
+    }
+
     public OTARProteinEntry build() {
       OTARProteinEntry entry = new OTARProteinEntry();
       entry.Id = this.Id;
@@ -91,6 +101,7 @@ public class OTARProteinEntry {
       entry.enzymeRegulations = EnzymeRegulations.from(this.enzymeRegulations);
       entry.catalyticAcitivities = CatalyticActivities.from(this.activities);
       entry.cofactorGroups = CofactorGroup.from(this.cofactorGroup);
+      entry.families = OTARProteinFamilies.from(this.families);
       return entry;
     }
 
