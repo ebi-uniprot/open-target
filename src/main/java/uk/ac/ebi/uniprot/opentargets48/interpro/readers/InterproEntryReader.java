@@ -20,6 +20,6 @@ public class InterproEntryReader implements ItemReader<ProteinFamily> {
   @Override
   public ProteinFamily read() throws ServiceException {
     ProteinFamilyResponse response = service.fetch("12344");
-    return new ProteinFamily("", "");
+    return null;
   }
 }

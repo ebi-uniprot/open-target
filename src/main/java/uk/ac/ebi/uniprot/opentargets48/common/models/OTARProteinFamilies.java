@@ -1,4 +1,4 @@
-package uk.ac.ebi.uniprot.opentargets48.uniprot.models;
+package uk.ac.ebi.uniprot.opentargets48.common.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.ArrayList;
@@ -15,7 +15,7 @@ public class OTARProteinFamilies {
   public static OTARProteinFamilies from(ProteinFamilies items) {
     List<OTARProteinFamily> families = new ArrayList<>();
     for (ProteinFamily family : items.getFamilies()) {
-      families.add(new OTARProteinFamily(family.getAccession(), family.getDescription()));
+      families.add(OTARProteinFamily.from(family));
     }
     return new OTARProteinFamilies(families);
   }

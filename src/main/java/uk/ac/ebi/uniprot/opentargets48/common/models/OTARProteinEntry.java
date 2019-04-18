@@ -9,23 +9,19 @@ import java.util.List;
 import java.util.Map;
 import lombok.Data;
 import uk.ac.ebi.uniprot.opentargets48.interpro.models.ProteinFamilies;
-import uk.ac.ebi.uniprot.opentargets48.interpro.models.ProteinFamily;
 import uk.ac.ebi.uniprot.opentargets48.uniprot.models.BiophysicochemicalProperties;
 import uk.ac.ebi.uniprot.opentargets48.uniprot.models.CatalyticActivities;
 import uk.ac.ebi.uniprot.opentargets48.uniprot.models.CofactorGroup;
 import uk.ac.ebi.uniprot.opentargets48.uniprot.models.Complexes;
 import uk.ac.ebi.uniprot.opentargets48.uniprot.models.EnzymeRegulations;
-import uk.ac.ebi.uniprot.opentargets48.uniprot.models.Kinetic;
-import uk.ac.ebi.uniprot.opentargets48.uniprot.models.OTARProteinFamilies;
 import uk.ac.ebi.uniprot.opentargets48.uniprot.models.ProteinFunctions;
-import uk.ac.ebi.uniprot.opentargets48.uniprot.models.Publications;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 public class OTARProteinEntry {
   private String Id;
   private String accession;
-  private List<BiophysicochemicalProperties> biophysicochemicalProperties = new ArrayList<>();
+  @JsonUnwrapped private BiophysicochemicalProperties biophysicochemicalProperties;
   @JsonUnwrapped private ProteinFunctions functions;
   @JsonUnwrapped private Complexes complexIds;
   @JsonUnwrapped private EnzymeRegulations enzymeRegulations;
@@ -93,9 +89,7 @@ public class OTARProteinEntry {
       OTARProteinEntry entry = new OTARProteinEntry();
       entry.Id = this.Id;
       entry.accession = this.accession;
-      for (Map<String, Object> property : this.bpcProperties) {
-        entry.biophysicochemicalProperties.add(createBpcProperty(property));
-      }
+      entry.biophysicochemicalProperties = BiophysicochemicalProperties.from(this.bpcProperties);
       entry.functions = ProteinFunctions.from(this.functions);
       entry.complexIds = Complexes.from(this.complexIds);
       entry.enzymeRegulations = EnzymeRegulations.from(this.enzymeRegulations);
@@ -103,29 +97,6 @@ public class OTARProteinEntry {
       entry.cofactorGroups = CofactorGroup.from(this.cofactorGroup);
       entry.families = OTARProteinFamilies.from(this.families);
       return entry;
-    }
-
-    private BiophysicochemicalProperties createBpcProperty(Map<String, Object> property) {
-      return BiophysicochemicalProperties.builder()
-          .type((String) property.get("type"))
-          .kinetics(
-              new HashMap<String, List<Kinetic>>() {
-                {
-                  put("km", getKinetics((List<Map<String, Object>>) property.get("km")));
-                }
-              })
-          .build();
-    }
-
-    private List<Kinetic> getKinetics(List<Map<String, Object>> kinetics) {
-      List<Kinetic> result = new ArrayList<>();
-      for (Map<String, Object> kinetic : kinetics) {
-        String value = (String) kinetic.get("value");
-        Publications publications =
-            Publications.from((List<Map<String, String>>) kinetic.get("evidences"));
-        result.add(new Kinetic(value, publications));
-      }
-      return result;
     }
   }
 
