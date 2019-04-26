@@ -23,8 +23,7 @@ public class UniProtEntryProcessor implements ItemProcessor<OTARUniProtEntry, OT
     ProteinFamilies families = ProteinFamilies.from(response);
 
     OTARProteinEntry.Builder builder =
-        new OTARProteinEntry.Builder(entry.getId())
-            .withAccession(entry.getAccession())
+        new OTARProteinEntry.Builder(entry.getId(), entry.getAccession())
             .withFunctions(entry.getFunctions())
             .withComplexIds(entry.getComplexIds())
             .withActivities(entry.getCatalyticActivities())

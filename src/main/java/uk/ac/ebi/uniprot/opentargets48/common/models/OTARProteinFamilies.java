@@ -14,8 +14,10 @@ public class OTARProteinFamilies {
 
   public static OTARProteinFamilies from(ProteinFamilies items) {
     List<OTARProteinFamily> families = new ArrayList<>();
-    for (ProteinFamily family : items.getFamilies()) {
-      families.add(OTARProteinFamily.from(family));
+    if (items != null) {
+      for (ProteinFamily family : items.getFamilies()) {
+        families.add(OTARProteinFamily.from(family));
+      }
     }
     return new OTARProteinFamilies(families);
   }

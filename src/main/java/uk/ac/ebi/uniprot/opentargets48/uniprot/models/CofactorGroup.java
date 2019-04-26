@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import lombok.Data;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -28,28 +27,28 @@ public class CofactorGroup {
     @JsonUnwrapped private final Publications publications;
   }
 
-  public static CofactorGroup from(Map<String, Object> cofactorGroup) {
-    List<Map<String, Object>> cofactors =
-        (List<Map<String, Object>>) cofactorGroup.get("cofactors");
-    List<Map<String, Object>> notes = (List<Map<String, Object>>) cofactorGroup.get("notes");
+  public static CofactorGroup from(CofactorGroupDescription cofactorGroup) {
+    if (cofactorGroup == null) {
+      return new CofactorGroup(new ArrayList<>(), new ArrayList<>());
+    }
+    List<CofactorDescription> cofactors = cofactorGroup.getCofactors();
+    List<NoteDescription> notes = cofactorGroup.getNotes();
 
     List<Cofactor> cfs = new ArrayList<>();
     if (cofactors != null) {
-      for (Map<String, Object> cofactor : cofactors) {
-        String text = (String) cofactor.get("value");
-        CrossRefs xrefs = CrossRefs.from((List<Map<String, String>>) cofactor.get("xrefs"));
-        Publications publications =
-            Publications.from((List<Map<String, String>>) cofactor.get("evidences"));
+      for (CofactorDescription cofactor : cofactors) {
+        String text = cofactor.getValue();
+        CrossRefs xrefs = CrossRefs.from(cofactor.getXrefs());
+        Publications publications = Publications.from(cofactor.getEvidences());
         cfs.add(new Cofactor(text, xrefs, publications));
       }
     }
 
     List<CofactorNote> cofactorNotes = new ArrayList<>();
     if (notes != null) {
-      for (Map<String, Object> note : notes) {
-        Publications publications =
-            Publications.from((List<Map<String, String>>) note.get("evidences"));
-        cofactorNotes.add(new CofactorNote((String) note.get("text"), publications));
+      for (NoteDescription note : notes) {
+        Publications publications = Publications.from(note.getEvidences());
+        cofactorNotes.add(new CofactorNote(note.getText(), publications));
       }
     }
     return new CofactorGroup(cfs, cofactorNotes);

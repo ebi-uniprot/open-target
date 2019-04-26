@@ -26,7 +26,7 @@ public class BiophysicochemicalProperty {
     for (Map<String, Object> kinetic : kinetics) {
       String value = (String) kinetic.get("value");
       Publications publications =
-          Publications.from((List<Map<String, String>>) kinetic.get("evidences"));
+          Publications.from((List<EvidenceDescription>) kinetic.get("evidences"));
       result.add(new Kinetic(value, publications));
     }
     return result;

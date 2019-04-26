@@ -13,8 +13,10 @@ public class BiophysicochemicalProperties {
 
   public static BiophysicochemicalProperties from(List<Map<String, Object>> items) {
     List<BiophysicochemicalProperty> biophysicochemicalProperties = new ArrayList<>();
-    for (Map<String, Object> item : items) {
-      biophysicochemicalProperties.add(BiophysicochemicalProperty.from(item));
+    if (items != null) {
+      for (Map<String, Object> item : items) {
+        biophysicochemicalProperties.add(BiophysicochemicalProperty.from(item));
+      }
     }
     return new BiophysicochemicalProperties(biophysicochemicalProperties);
   }

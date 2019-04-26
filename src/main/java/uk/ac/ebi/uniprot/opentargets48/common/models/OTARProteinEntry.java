@@ -4,16 +4,19 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonIgnoreType;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.Data;
 import uk.ac.ebi.uniprot.opentargets48.interpro.models.ProteinFamilies;
 import uk.ac.ebi.uniprot.opentargets48.uniprot.models.BiophysicochemicalProperties;
 import uk.ac.ebi.uniprot.opentargets48.uniprot.models.CatalyticActivities;
+import uk.ac.ebi.uniprot.opentargets48.uniprot.models.CatalyticActivityDescription;
 import uk.ac.ebi.uniprot.opentargets48.uniprot.models.CofactorGroup;
+import uk.ac.ebi.uniprot.opentargets48.uniprot.models.CofactorGroupDescription;
 import uk.ac.ebi.uniprot.opentargets48.uniprot.models.Complexes;
+import uk.ac.ebi.uniprot.opentargets48.uniprot.models.EnzymeRegulationDescription;
 import uk.ac.ebi.uniprot.opentargets48.uniprot.models.EnzymeRegulations;
+import uk.ac.ebi.uniprot.opentargets48.uniprot.models.FunctionDescription;
 import uk.ac.ebi.uniprot.opentargets48.uniprot.models.ProteinFunctions;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -34,23 +37,19 @@ public class OTARProteinEntry {
     private String Id;
     private String accession;
     private List<String> complexIds = new ArrayList<>();
-    private List<Map<String, Object>> activities = new ArrayList<>();
-    private List<Map<String, Object>> functions = new ArrayList<>();
-    private List<Map<String, Object>> enzymeRegulations = new ArrayList<>();
+    private List<CatalyticActivityDescription> activities = new ArrayList<>();
+    private List<FunctionDescription> functions = new ArrayList<>();
+    private List<EnzymeRegulationDescription> enzymeRegulations = new ArrayList<>();
     private List<Map<String, Object>> bpcProperties = new ArrayList<>();
-    private Map<String, Object> cofactorGroup = new HashMap<>();
+    private CofactorGroupDescription cofactorGroup;
     private ProteinFamilies families;
 
-    public Builder(String Id) {
+    public Builder(String Id, String accession) {
       this.Id = Id;
-    }
-
-    public Builder withAccession(String accession) {
       this.accession = accession;
-      return this;
     }
 
-    public Builder withFunctions(List<Map<String, Object>> functions) {
+    public Builder withFunctions(List<FunctionDescription> functions) {
       this.functions.addAll(functions);
       return this;
     }
@@ -60,12 +59,12 @@ public class OTARProteinEntry {
       return this;
     }
 
-    public Builder withActivities(List<Map<String, Object>> activities) {
+    public Builder withActivities(List<CatalyticActivityDescription> activities) {
       this.activities.addAll(activities);
       return this;
     }
 
-    public Builder withEnzymeRegulations(List<Map<String, Object>> regulations) {
+    public Builder withEnzymeRegulations(List<EnzymeRegulationDescription> regulations) {
       this.enzymeRegulations.addAll(regulations);
       return this;
     }
@@ -75,7 +74,7 @@ public class OTARProteinEntry {
       return this;
     }
 
-    public Builder withCofactors(Map<String, Object> cofactorGroup) {
+    public Builder withCofactors(CofactorGroupDescription cofactorGroup) {
       this.cofactorGroup = cofactorGroup;
       return this;
     }

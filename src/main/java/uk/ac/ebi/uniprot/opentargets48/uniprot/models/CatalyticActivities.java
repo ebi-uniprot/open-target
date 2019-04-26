@@ -11,10 +11,12 @@ import lombok.Data;
 public class CatalyticActivities {
   private final List<CatalyticAcitivity> catalyticAcitivities;
 
-  public static CatalyticActivities from(List<Map<String, Object>> activities) {
+  public static CatalyticActivities from(List<CatalyticActivityDescription> activities) {
     List<CatalyticAcitivity> result = new ArrayList<>();
-    for (Map<String, Object> activity: activities) {
-      result.add(CatalyticAcitivity.from(activity));
+    if (activities != null) {
+      for (CatalyticActivityDescription activity: activities) {
+        result.add(CatalyticAcitivity.from(activity));
+      }
     }
     return new CatalyticActivities(result);
   }

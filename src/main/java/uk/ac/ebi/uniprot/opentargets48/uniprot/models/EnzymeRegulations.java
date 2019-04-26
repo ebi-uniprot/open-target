@@ -3,7 +3,6 @@ package uk.ac.ebi.uniprot.opentargets48.uniprot.models;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import lombok.Data;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -11,14 +10,15 @@ import lombok.Data;
 public class EnzymeRegulations {
   private final List<EnzymeRegulation> enzymeRegulations;
 
-  public static EnzymeRegulations from(List<Map<String, Object>> items) {
-    List<EnzymeRegulation> result = new ArrayList<>();
-    for (Map<String, Object> item : items) {
-      Publications publications =
-          Publications.from((List<Map<String, String>>) item.get("evidences"));
-      String text = (String) item.get("text");
-      result.add(new EnzymeRegulation(text, publications));
+  public static EnzymeRegulations from(List<EnzymeRegulationDescription> items) {
+    List<EnzymeRegulation> enzymeRegulations = new ArrayList<>();
+    if (items != null) {
+      for (EnzymeRegulationDescription item : items) {
+        Publications publications = Publications.from(item.getEvidences());
+        String text = item.getValue();
+        enzymeRegulations.add(new EnzymeRegulation(text, publications));
+      }
     }
-    return new EnzymeRegulations(result);
+    return new EnzymeRegulations(enzymeRegulations);
   }
 }
