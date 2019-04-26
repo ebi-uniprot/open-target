@@ -13,8 +13,10 @@ public class GoTerms {
 
   public static GoTerms from(List<Map<String, Object>> items) {
     List<GoTerm> goTerms = new ArrayList<>();
-    for (Map<String, Object> item : items) {
-      goTerms.add(GoTerm.from(item));
+    if (items != null) {
+      for (Map<String, Object> item : items) {
+        goTerms.add(GoTerm.from(item));
+      }
     }
     return new GoTerms(goTerms);
   }

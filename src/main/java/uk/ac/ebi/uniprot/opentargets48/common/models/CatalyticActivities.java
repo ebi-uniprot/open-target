@@ -1,10 +1,10 @@
-package uk.ac.ebi.uniprot.opentargets48.uniprot.models;
+package uk.ac.ebi.uniprot.opentargets48.common.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import lombok.Data;
+import uk.ac.ebi.uniprot.opentargets48.uniprot.models.CatalyticActivityDescription;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data

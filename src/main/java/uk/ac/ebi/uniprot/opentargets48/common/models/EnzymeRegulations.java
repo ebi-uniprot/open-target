@@ -1,9 +1,10 @@
-package uk.ac.ebi.uniprot.opentargets48.uniprot.models;
+package uk.ac.ebi.uniprot.opentargets48.common.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
+import uk.ac.ebi.uniprot.opentargets48.uniprot.models.EnzymeRegulationDescription;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data

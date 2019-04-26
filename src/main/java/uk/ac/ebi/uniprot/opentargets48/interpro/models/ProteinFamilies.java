@@ -13,9 +13,11 @@ public class ProteinFamilies {
 
   public static ProteinFamilies from(ProteinFamilyResponse response) {
     List<ProteinFamily> families = new ArrayList<>();
-    List<Map<String, Object>> results = response.getResults();
-    for (Map<String, Object> result : results) {
-      families.add(ProteinFamily.from(result));
+    if (response != null) {
+      List<Map<String, Object>> results = response.getResults();
+      for (Map<String, Object> result : results) {
+        families.add(ProteinFamily.from(result));
+      }
     }
     return new ProteinFamilies(families);
   }

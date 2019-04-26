@@ -2,7 +2,6 @@ package uk.ac.ebi.uniprot.opentargets48.uniprot.processors;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.ItemProcessor;
-import org.springframework.web.client.RestTemplate;
 import uk.ac.ebi.uniprot.opentargets48.common.models.OTARProteinEntry;
 import uk.ac.ebi.uniprot.opentargets48.interpro.models.ProteinFamilies;
 import uk.ac.ebi.uniprot.opentargets48.interpro.models.ProteinFamilyResponse;
@@ -11,6 +10,11 @@ import uk.ac.ebi.uniprot.opentargets48.uniprot.models.OTARUniProtEntry;
 
 @Slf4j
 public class UniProtEntryProcessor implements ItemProcessor<OTARUniProtEntry, OTARProteinEntry> {
+  private final InterproService interpro;
+
+  public UniProtEntryProcessor(InterproService interpro) {
+    this.interpro = interpro;
+  }
 
   public OTARProteinEntry process(OTARUniProtEntry entry) {
     log.debug("Processing data");
@@ -18,9 +22,8 @@ public class UniProtEntryProcessor implements ItemProcessor<OTARUniProtEntry, OT
   }
 
   private OTARProteinEntry createProteinEntry(OTARUniProtEntry entry) {
-    RestTemplate restTemplate = new RestTemplate();
-    ProteinFamilyResponse response = new InterproService(restTemplate).fetch(entry.getAccession());
-    ProteinFamilies families = ProteinFamilies.from(response);
+    ProteinFamilyResponse familyResponse = interpro.fetch(entry.getAccession());
+    ProteinFamilies families = ProteinFamilies.from(familyResponse);
 
     OTARProteinEntry.Builder builder =
         new OTARProteinEntry.Builder(entry.getId(), entry.getAccession())

@@ -1,4 +1,4 @@
-package uk.ac.ebi.uniprot.opentargets48.uniprot.models;
+package uk.ac.ebi.uniprot.opentargets48.common.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;

@@ -8,16 +8,10 @@ import java.util.List;
 import java.util.Map;
 import lombok.Data;
 import uk.ac.ebi.uniprot.opentargets48.interpro.models.ProteinFamilies;
-import uk.ac.ebi.uniprot.opentargets48.uniprot.models.BiophysicochemicalProperties;
-import uk.ac.ebi.uniprot.opentargets48.uniprot.models.CatalyticActivities;
 import uk.ac.ebi.uniprot.opentargets48.uniprot.models.CatalyticActivityDescription;
-import uk.ac.ebi.uniprot.opentargets48.uniprot.models.CofactorGroup;
 import uk.ac.ebi.uniprot.opentargets48.uniprot.models.CofactorGroupDescription;
-import uk.ac.ebi.uniprot.opentargets48.uniprot.models.Complexes;
 import uk.ac.ebi.uniprot.opentargets48.uniprot.models.EnzymeRegulationDescription;
-import uk.ac.ebi.uniprot.opentargets48.uniprot.models.EnzymeRegulations;
 import uk.ac.ebi.uniprot.opentargets48.uniprot.models.FunctionDescription;
-import uk.ac.ebi.uniprot.opentargets48.uniprot.models.ProteinFunctions;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data

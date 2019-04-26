@@ -1,4 +1,4 @@
-package uk.ac.ebi.uniprot.opentargets48.uniprot.models;
+package uk.ac.ebi.uniprot.opentargets48.common.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
+import uk.ac.ebi.uniprot.opentargets48.uniprot.models.CrossRefDescription;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
