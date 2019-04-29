@@ -16,6 +16,7 @@ import uk.ac.ebi.uniprot.dataservice.client.Client;
 import uk.ac.ebi.uniprot.dataservice.client.ServiceFactory;
 import uk.ac.ebi.uniprot.opentargets48.common.models.OTARProteinEntry;
 import uk.ac.ebi.uniprot.opentargets48.interpro.services.InterproService;
+import uk.ac.ebi.uniprot.opentargets48.uniprot.listeners.UniprotReadListener;
 import uk.ac.ebi.uniprot.opentargets48.uniprot.models.OTARUniProtEntry;
 import uk.ac.ebi.uniprot.opentargets48.uniprot.processors.UniProtEntryProcessor;
 import uk.ac.ebi.uniprot.opentargets48.uniprot.readers.UniProtEntryReader;
@@ -59,6 +60,7 @@ public class UniProtConfig {
         .get("uniProtEntries")
         .<OTARUniProtEntry, OTARProteinEntry>chunk(DEFAULT_CHUNK_SIZE)
         .reader(reader)
+        .listener(new UniprotReadListener())
         .processor(processor)
         .writer(writer)
         .build();

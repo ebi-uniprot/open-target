@@ -41,9 +41,9 @@ public class UniProtEntryReader implements ItemReader<OTARUniProtEntry> {
             UniProtQueryBuilder.comments(CommentType.COFACTOR, "*")
                 .or(UniProtQueryBuilder.comments(CommentType.FUNCTION, "*"))
                 .or(UniProtQueryBuilder.comments(CommentType.CATALYTIC_ACTIVITY, "*"))
-                .or(UniProtQueryBuilder.comments(CommentType.BIOPHYSICOCHEMICAL_PROPERTIES, "*")));
-    // .and(UniProtQueryBuilder.accession("P27815"));
-    // .and(UniProtQueryBuilder.accession("P05067"));
+                .or(UniProtQueryBuilder.comments(CommentType.BIOPHYSICOCHEMICAL_PROPERTIES, "*")))
+        //.and(UniProtQueryBuilder.accession("P27815"));
+        .and(UniProtQueryBuilder.accession("P05067"));
     // .and(UniProtQueryBuilder.accession("P69892"));
   }
 

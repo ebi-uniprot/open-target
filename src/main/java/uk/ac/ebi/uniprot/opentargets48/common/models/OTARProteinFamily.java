@@ -12,11 +12,14 @@ public class OTARProteinFamily {
   private final String description;
   @JsonUnwrapped
   private final OTARGoTerms goTerms;
+  @JsonUnwrapped
+  private final Publications publications;
 
   public static OTARProteinFamily from(ProteinFamily family) {
     String Id = family.getAccession();
     String description = family.getDescription();
     OTARGoTerms goTerms = OTARGoTerms.from(family.getGoTerms());
-    return new OTARProteinFamily(Id, description, goTerms);
+    Publications publications = family.getPublications();
+    return new OTARProteinFamily(Id, description, goTerms, publications);
   }
 }

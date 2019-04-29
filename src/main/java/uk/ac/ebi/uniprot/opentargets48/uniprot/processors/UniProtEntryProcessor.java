@@ -17,13 +17,13 @@ public class UniProtEntryProcessor implements ItemProcessor<OTARUniProtEntry, OT
   }
 
   public OTARProteinEntry process(OTARUniProtEntry entry) {
-    log.debug("Processing data");
     return createProteinEntry(entry);
   }
 
   private OTARProteinEntry createProteinEntry(OTARUniProtEntry entry) {
     ProteinFamilyResponse familyResponse = interpro.fetch(entry.getAccession());
     ProteinFamilies families = ProteinFamilies.from(familyResponse);
+    log.debug("Got interpro response");
 
     OTARProteinEntry.Builder builder =
         new OTARProteinEntry.Builder(entry.getId(), entry.getAccession())
