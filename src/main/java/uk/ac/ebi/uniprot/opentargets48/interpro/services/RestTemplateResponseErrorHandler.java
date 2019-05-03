@@ -19,14 +19,14 @@ public class RestTemplateResponseErrorHandler implements ResponseErrorHandler {
   }
 
   @Override
-  public void handleError(ClientHttpResponse httpResponse) throws IOException {
+  public void handleError( ClientHttpResponse httpResponse) throws IOException {
     HttpStatus.Series statusCode = httpResponse.getStatusCode().series();
     if (statusCode == HttpStatus.Series.SERVER_ERROR) {
-      log.info("Interpro server error");
+      log.error("Server error");
     } else if (statusCode == HttpStatus.Series.CLIENT_ERROR) {
-      log.info("Interpro client error");
+      log.error("Client error " + statusCode.toString());
       if (httpResponse.getStatusCode() == HttpStatus.NOT_FOUND) {
-        log.info("Interpro client error not found");
+        log.error("Client error not found " + statusCode.toString());
       }
     }
   }

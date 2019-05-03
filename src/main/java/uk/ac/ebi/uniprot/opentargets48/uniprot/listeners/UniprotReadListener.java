@@ -9,16 +9,17 @@ import uk.ac.ebi.uniprot.opentargets48.uniprot.models.OTARUniProtEntry;
 public class UniprotReadListener implements ItemReadListener<OTARUniProtEntry> {
   @Override
   public void beforeRead() {
-    log.info("ItemReadListener - beforeRead");
+    log.info("Reading UniProt entry");
   }
 
   @Override
   public void afterRead(OTARUniProtEntry item) {
-    log.info("ItemReadListener - afterRead");
+    log.info("Done reading UniProt entry: " + item.getAccession());
   }
 
   @Override
   public void onReadError(Exception e) {
+    log.error("Error occured while reading UniProt entry");
     log.error(e.getMessage());
   }
 }

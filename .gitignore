@@ -10,3 +10,7 @@ application.properties
 
 ### VS Code ###
 .vscode/
+
+### Output
+
+out/**/*.json

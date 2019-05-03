@@ -14,30 +14,30 @@ import uk.ac.ebi.uniprot.opentargets48.uniprot.models.EvidenceDescription;
 public class ProteinFamily {
   private final String accession;
   private final String description;
-  private final GoTerms goTerms;
+  private final List<GoTerm> goTerms;
   private final Publications publications;
 
-  public static ProteinFamily from(Map<String, Object> result) {
-    Map<String, Object> metadata = (Map<String, Object>) result.get("metadata");
-    Map<String, Object> extraFields = (Map<String, Object>) result.get("extra_fields");
-    String accession = (String) metadata.get("accession");
-    List<String> descriptions = (List<String>) extraFields.get("description");
+  public static ProteinFamily from(Result result) {
+    String accession = result.getMetadata().getAccession();
+    List<String> descriptions = result.getExtra_fields().getDescription();
     StringBuilder description = new StringBuilder();
     for (String str : descriptions) {
       description.append(str);
     }
-    LinkedHashMap<String, Object> literature = (LinkedHashMap<String, Object>) extraFields.get("literature");
     List<EvidenceDescription> evidences = new ArrayList<>();
-    for (Map.Entry<String, Object> entry : literature.entrySet()) {
-      String code = entry.getKey();
-      Integer Id = ((Map<String, Integer>) entry.getValue()).get("PMID");
-      String name = "PMID";
-      evidences.add(new EvidenceDescription(code, Id.toString(), name));
+    LinkedHashMap<String, Object> literature = result.getExtra_fields().getLiterature();
+    if (literature != null) {
+      for (Map.Entry<String, Object> entry : literature.entrySet()) {
+        String code = entry.getKey();
+        Integer Id = ((Map<String, Integer>) entry.getValue()).get("PMID");
+        String name = "PMID";
+        evidences.add(new EvidenceDescription(code, Id.toString(), name));
+      }
     }
     return new ProteinFamily(
         accession,
         description.toString(),
-        GoTerms.from((List<Map<String, Object>>) metadata.get("go_terms")),
+        result.getMetadata().getGo_terms(),
         Publications.from(evidences)
     );
   }

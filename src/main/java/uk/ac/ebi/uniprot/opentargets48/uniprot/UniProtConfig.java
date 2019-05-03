@@ -1,5 +1,6 @@
 package uk.ac.ebi.uniprot.opentargets48.uniprot;
 
+import java.io.File;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
@@ -8,13 +9,16 @@ import org.springframework.batch.core.configuration.annotation.StepBuilderFactor
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.json.JacksonJsonObjectMarshaller;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import uk.ac.ebi.uniprot.dataservice.client.Client;
 import uk.ac.ebi.uniprot.dataservice.client.ServiceFactory;
 import uk.ac.ebi.uniprot.opentargets48.common.models.OTARProteinEntry;
+import uk.ac.ebi.uniprot.opentargets48.common.services.RetryStrategy;
 import uk.ac.ebi.uniprot.opentargets48.interpro.services.InterproService;
 import uk.ac.ebi.uniprot.opentargets48.uniprot.listeners.UniprotReadListener;
 import uk.ac.ebi.uniprot.opentargets48.uniprot.models.OTARUniProtEntry;
@@ -25,31 +29,17 @@ import uk.ac.ebi.uniprot.opentargets48.uniprot.writers.JsonItemWriter;
 @Configuration
 @EnableBatchProcessing
 public class UniProtConfig {
-  public static final int DEFAULT_CHUNK_SIZE = 10;
-  public static final String JOB_NAME = "processUniProtEntries";
-  public static final String JSON_FILE_NAME = "protein.json";
+  public static final int DEFAULT_CHUNK_SIZE = 50;
+  public static final String JOB_NAME = "processEntriesJob";
+  public static final String STEP_NAME = "processEntriesStep";
+  public static final String JSON_FILE_NAME = "proteins.json";
+
+  @Value("${spring.batch.outDir}")
+  private String outDir;
 
   @Autowired private JobBuilderFactory jobs;
 
   @Autowired private StepBuilderFactory steps;
-
-  @Bean
-  protected UniProtEntryReader itemReader() {
-    ServiceFactory serviceFactoryInstance = Client.getServiceFactoryInstance();
-    return new UniProtEntryReader(serviceFactoryInstance.getUniProtQueryService());
-  }
-
-  @Bean
-  public UniProtEntryProcessor itemProcessor() {
-    InterproService interproService = new InterproService(new RestTemplateBuilder());
-    return new UniProtEntryProcessor(interproService);
-  }
-
-  @Bean
-  public JsonItemWriter jsonFileItemWriter() {
-    return new JsonItemWriter(
-        new ClassPathResource(JSON_FILE_NAME), new JacksonJsonObjectMarshaller<>());
-  }
 
   @Bean
   protected Step processEntries(
@@ -57,7 +47,7 @@ public class UniProtConfig {
       UniProtEntryProcessor processor,
       ItemWriter<OTARProteinEntry> writer) {
     return steps
-        .get("uniProtEntries")
+        .get(STEP_NAME)
         .<OTARUniProtEntry, OTARProteinEntry>chunk(DEFAULT_CHUNK_SIZE)
         .reader(reader)
         .listener(new UniprotReadListener())
@@ -71,5 +61,28 @@ public class UniProtConfig {
     return jobs.get(JOB_NAME)
         .start(processEntries(itemReader(), itemProcessor(), jsonFileItemWriter()))
         .build();
+  }
+
+  @Bean
+  protected UniProtEntryReader itemReader() {
+    ServiceFactory serviceFactoryInstance = Client.getServiceFactoryInstance();
+    return new UniProtEntryReader(
+        serviceFactoryInstance.getUniProtQueryService(), getRetryStrategy());
+  }
+
+  @Bean
+  public UniProtEntryProcessor itemProcessor() {
+    InterproService interproService = new InterproService(new RestTemplateBuilder());
+    return new UniProtEntryProcessor(interproService, getRetryStrategy());
+  }
+
+  @Bean
+  public JsonItemWriter jsonFileItemWriter() {
+    Resource output = new FileSystemResource(new File(outDir + JSON_FILE_NAME));
+    return new JsonItemWriter(output, new JacksonJsonObjectMarshaller<>());
+  }
+
+  private RetryStrategy getRetryStrategy() {
+    return new RetryStrategy();
   }
 }

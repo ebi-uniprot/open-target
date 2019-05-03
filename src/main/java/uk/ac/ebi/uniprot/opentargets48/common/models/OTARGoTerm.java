@@ -12,7 +12,7 @@ public class OTARGoTerm {
   private final OTARGoCategory category;
 
   public static OTARGoTerm from(GoTerm item) {
-    String Id = item.getId();
+    String Id = item.getIdentifier();
     String name = item.getName();
     OTARGoCategory category = OTARGoCategory.from(item.getCategory());
     return new OTARGoTerm(Id, name, category);

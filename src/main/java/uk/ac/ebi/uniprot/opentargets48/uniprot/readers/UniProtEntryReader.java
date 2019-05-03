@@ -9,6 +9,7 @@ import uk.ac.ebi.uniprot.dataservice.client.exception.ServiceException;
 import uk.ac.ebi.uniprot.dataservice.client.uniprot.UniProtQueryBuilder;
 import uk.ac.ebi.uniprot.dataservice.client.uniprot.UniProtService;
 import uk.ac.ebi.uniprot.dataservice.query.Query;
+import uk.ac.ebi.uniprot.opentargets48.common.services.RetryStrategy;
 import uk.ac.ebi.uniprot.opentargets48.uniprot.models.OTARUniProtEntry;
 import uk.ac.ebi.uniprot.opentargets48.uniprot.models.UniProtEntryBuilder;
 
@@ -17,9 +18,13 @@ public class UniProtEntryReader implements ItemReader<OTARUniProtEntry> {
   static final int HUMAN_TAXONOMY_ID = 9606;
   private final UniProtService service;
   private Iterator<UniProtEntry> iterator;
+  private RetryStrategy<OTARUniProtEntry> retryStrategy;
+  private int total;
 
-  public UniProtEntryReader(UniProtService service) {
+  public UniProtEntryReader(UniProtService service, RetryStrategy retryStrategy) {
     this.service = service;
+    this.total = 0;
+    this.retryStrategy = retryStrategy;
   }
 
   @Override
@@ -27,12 +32,25 @@ public class UniProtEntryReader implements ItemReader<OTARUniProtEntry> {
     if (iterator == null) {
       iterator = entries();
     }
-    if (iterator.hasNext()) {
-      return convert(iterator.next());
-    } else {
-      service.stop();
-      return null;
-    }
+    return retryStrategy.execute(
+        context -> {
+          if (context.getRetryCount() > 0) {
+            log.warn("Retrying again with count :" + context.getRetryCount());
+          }
+          // TODO(vpoddar): For testing purpose only.
+          if (total == 20) {
+            return null;
+          }
+          if (iterator.hasNext()) {
+            total++;
+            log.info("Entry count so far: " + total);
+            return convert(iterator.next());
+          } else {
+            log.info("Finished reading " + total + " entries in UniProt");
+            service.stop();
+            return null;
+          }
+        });
   }
 
   public Query getQuery() {
@@ -41,10 +59,10 @@ public class UniProtEntryReader implements ItemReader<OTARUniProtEntry> {
             UniProtQueryBuilder.comments(CommentType.COFACTOR, "*")
                 .or(UniProtQueryBuilder.comments(CommentType.FUNCTION, "*"))
                 .or(UniProtQueryBuilder.comments(CommentType.CATALYTIC_ACTIVITY, "*"))
-                .or(UniProtQueryBuilder.comments(CommentType.BIOPHYSICOCHEMICAL_PROPERTIES, "*")))
-        //.and(UniProtQueryBuilder.accession("P27815"));
-        .and(UniProtQueryBuilder.accession("P05067"));
-    // .and(UniProtQueryBuilder.accession("P69892"));
+                .or(UniProtQueryBuilder.comments(CommentType.BIOPHYSICOCHEMICAL_PROPERTIES, "*")));
+        // .and(UniProtQueryBuilder.accession("P27815"));
+        // .and(UniProtQueryBuilder.accession("P05067"));
+        //.and(UniProtQueryBuilder.accession("P69892"));
   }
 
   private Iterator<UniProtEntry> entries() throws ServiceException {

@@ -13,10 +13,12 @@ import uk.ac.ebi.uniprot.opentargets48.interpro.models.GoTerms;
 public class OTARGoTerms {
   private final List<OTARGoTerm> goTerms;
 
-  public static OTARGoTerms from(GoTerms items) {
+  public static OTARGoTerms from(List<GoTerm> items) {
     List<OTARGoTerm> goTerms = new ArrayList<>();
-    for (GoTerm item : items.getGoTerms()) {
-      goTerms.add(OTARGoTerm.from(item));
+    if (items != null) {
+      for (GoTerm item : items) {
+        goTerms.add(OTARGoTerm.from(item));
+      }
     }
     return new OTARGoTerms(goTerms);
   }
