@@ -4,67 +4,61 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonIgnoreType;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.Data;
-import uk.ac.ebi.uniprot.opentargets48.uniprot.models.BiophysicochemicalProperties;
-import uk.ac.ebi.uniprot.opentargets48.uniprot.models.CatalyticActivities;
-import uk.ac.ebi.uniprot.opentargets48.uniprot.models.CofactorGroup;
-import uk.ac.ebi.uniprot.opentargets48.uniprot.models.Complexes;
-import uk.ac.ebi.uniprot.opentargets48.uniprot.models.EnzymeRegulations;
-import uk.ac.ebi.uniprot.opentargets48.uniprot.models.Kinetic;
-import uk.ac.ebi.uniprot.opentargets48.uniprot.models.ProteinFunctions;
-import uk.ac.ebi.uniprot.opentargets48.uniprot.models.Publications;
+import uk.ac.ebi.uniprot.opentargets48.interpro.models.ProteinFamilies;
+import uk.ac.ebi.uniprot.opentargets48.uniprot.models.CatalyticActivityDescription;
+import uk.ac.ebi.uniprot.opentargets48.uniprot.models.CofactorGroupDescription;
+import uk.ac.ebi.uniprot.opentargets48.uniprot.models.EnzymeRegulationDescription;
+import uk.ac.ebi.uniprot.opentargets48.uniprot.models.FunctionDescription;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 public class OTARProteinEntry {
   private String Id;
   private String accession;
-  private List<BiophysicochemicalProperties> biophysicochemicalProperties = new ArrayList<>();
+  @JsonUnwrapped private BiophysicochemicalProperties biophysicochemicalProperties;
   @JsonUnwrapped private ProteinFunctions functions;
-  @JsonUnwrapped private Complexes complexIds;
+  @JsonUnwrapped private Complexes complexes;
   @JsonUnwrapped private EnzymeRegulations enzymeRegulations;
   @JsonUnwrapped private CatalyticActivities catalyticAcitivities;
+  @JsonUnwrapped private OTARProteinFamilies families;
   private CofactorGroup cofactorGroups;
 
   @JsonIgnoreType
   public static class Builder {
     private String Id;
     private String accession;
-    private List<String> complexIds = new ArrayList<>();
-    private List<Map<String, Object>> activities = new ArrayList<>();
-    private List<Map<String, Object>> functions = new ArrayList<>();
-    private List<Map<String, Object>> enzymeRegulations = new ArrayList<>();
+    private List<Map<String, String>> complexes = new ArrayList<>();
+    private List<CatalyticActivityDescription> activities = new ArrayList<>();
+    private List<FunctionDescription> functions = new ArrayList<>();
+    private List<EnzymeRegulationDescription> enzymeRegulations = new ArrayList<>();
     private List<Map<String, Object>> bpcProperties = new ArrayList<>();
-    private Map<String, Object> cofactorGroup = new HashMap<>();
+    private CofactorGroupDescription cofactorGroup;
+    private ProteinFamilies families;
 
-    public Builder(String Id) {
+    public Builder(String Id, String accession) {
       this.Id = Id;
-    }
-
-    public Builder withAccession(String accession) {
       this.accession = accession;
-      return this;
     }
 
-    public Builder withFunctions(List<Map<String, Object>> functions) {
+    public Builder withFunctions(List<FunctionDescription> functions) {
       this.functions.addAll(functions);
       return this;
     }
 
-    public Builder withComplexIds(List<String> complexIds) {
-      this.complexIds.addAll(complexIds);
+    public Builder withComplexes(List<Map<String, String>> complexes) {
+      this.complexes.addAll(complexes);
       return this;
     }
 
-    public Builder withActivities(List<Map<String, Object>> activities) {
+    public Builder withActivities(List<CatalyticActivityDescription> activities) {
       this.activities.addAll(activities);
       return this;
     }
 
-    public Builder withEnzymeRegulations(List<Map<String, Object>> regulations) {
+    public Builder withEnzymeRegulations(List<EnzymeRegulationDescription> regulations) {
       this.enzymeRegulations.addAll(regulations);
       return this;
     }
@@ -74,8 +68,13 @@ public class OTARProteinEntry {
       return this;
     }
 
-    public Builder withCofactors(Map<String, Object> cofactorGroup) {
+    public Builder withCofactors(CofactorGroupDescription cofactorGroup) {
       this.cofactorGroup = cofactorGroup;
+      return this;
+    }
+
+    public Builder withFamilies(ProteinFamilies families) {
+      this.families = families;
       return this;
     }
 
@@ -83,38 +82,14 @@ public class OTARProteinEntry {
       OTARProteinEntry entry = new OTARProteinEntry();
       entry.Id = this.Id;
       entry.accession = this.accession;
-      for (Map<String, Object> property : this.bpcProperties) {
-        entry.biophysicochemicalProperties.add(createBpcProperty(property));
-      }
+      entry.biophysicochemicalProperties = BiophysicochemicalProperties.from(this.bpcProperties);
       entry.functions = ProteinFunctions.from(this.functions);
-      entry.complexIds = Complexes.from(this.complexIds);
+      entry.complexes = Complexes.from(this.complexes);
       entry.enzymeRegulations = EnzymeRegulations.from(this.enzymeRegulations);
       entry.catalyticAcitivities = CatalyticActivities.from(this.activities);
       entry.cofactorGroups = CofactorGroup.from(this.cofactorGroup);
+      entry.families = OTARProteinFamilies.from(this.families);
       return entry;
-    }
-
-    private BiophysicochemicalProperties createBpcProperty(Map<String, Object> property) {
-      return BiophysicochemicalProperties.builder()
-          .type((String) property.get("type"))
-          .kinetics(
-              new HashMap<String, List<Kinetic>>() {
-                {
-                  put("km", getKinetics((List<Map<String, Object>>) property.get("km")));
-                }
-              })
-          .build();
-    }
-
-    private List<Kinetic> getKinetics(List<Map<String, Object>> kinetics) {
-      List<Kinetic> result = new ArrayList<>();
-      for (Map<String, Object> kinetic : kinetics) {
-        String value = (String) kinetic.get("value");
-        Publications publications =
-            Publications.from((List<Map<String, String>>) kinetic.get("evidences"));
-        result.add(new Kinetic(value, publications));
-      }
-      return result;
     }
   }
 

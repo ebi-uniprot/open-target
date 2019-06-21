@@ -25,12 +25,12 @@ import uk.ac.ebi.kraken.model.uniprot.comments.KineticParametersImpl;
 public class UniProtEntryBuilder {
   private String Id;
   private String accession;
-  private List<String> complexIds = new ArrayList<>();
-  private List<Map<String, Object>> functions = new ArrayList<>();
-  private List<Map<String, Object>> catalyticActivities = new ArrayList<>();
-  private List<Map<String, Object>> enzymeRegulations = new ArrayList<>();
+  private List<Map<String, String>> complexes = new ArrayList<>();
+  private List<FunctionDescription> functions = new ArrayList<>();
+  private List<CatalyticActivityDescription> catalyticActivities = new ArrayList<>();
+  private List<EnzymeRegulationDescription> enzymeRegulations = new ArrayList<>();
+  private CofactorGroupDescription cofactorGroup;
   private List<Map<String, Object>> bpcProperties = new ArrayList<>();
-  private Map<String, Object> cofactorGroup = new HashMap<>();
 
   public UniProtEntryBuilder(String Id, String accession) {
     this.Id = Id;
@@ -39,10 +39,9 @@ public class UniProtEntryBuilder {
 
   public UniProtEntryBuilder withFunctions(UniProtEntry entry) {
     for (Comment comment : entry.getComments(CommentType.FUNCTION)) {
-      Map<String, Object> map = new HashMap<>();
-      map.put("text", ((FunctionCommentImpl) comment).getValue());
-      map.put("evidences", getEvidences(comment.getEvidenceIds()));
-      this.functions.add(map);
+      String text = ((FunctionCommentImpl) comment).getValue();
+      List<EvidenceDescription> evidences = getEvidences(comment.getEvidenceIds());
+      this.functions.add(new FunctionDescription(text, evidences));
     }
     return this;
   }
@@ -51,7 +50,10 @@ public class UniProtEntryBuilder {
     List<DatabaseCrossReference> references =
         entry.getDatabaseCrossReferences(DatabaseType.COMPLEXPORTAL);
     for (DatabaseCrossReference r : references) {
-      this.complexIds.add(r.getPrimaryId().toString());
+      Map<String, String> complex = new HashMap<>();
+      complex.put("Id", r.getPrimaryId().toString());
+      complex.put("description", r.getDescription().toString());
+      this.complexes.add(complex);
     }
     return this;
   }
@@ -59,12 +61,11 @@ public class UniProtEntryBuilder {
   public UniProtEntryBuilder withCatalyticActivities(UniProtEntry entry) {
     for (Comment c : entry.getComments(CommentType.CATALYTIC_ACTIVITY)) {
       CatalyticActivityCommentStructuredImpl fc = (CatalyticActivityCommentStructuredImpl) c;
-      Map<String, Object> activity = new HashMap<>();
-      activity.put("type", "reaction");
-      activity.put("name", fc.getReaction().getName());
-      activity.put("ecNumber", fc.getReaction().getECNumber());
-      activity.put("xrefs", getReferences(fc.getReaction().getReactionReferences()));
-      this.catalyticActivities.add(activity);
+      String type = "reaction";
+      String name = fc.getReaction().getName();
+      String ecNumber = fc.getReaction().getECNumber();
+      List<CrossRefDescription> xrefs = getReferences(fc.getReaction().getReactionReferences());
+      this.catalyticActivities.add(new CatalyticActivityDescription(type, name, ecNumber, xrefs));
     }
     return this;
   }
@@ -74,10 +75,8 @@ public class UniProtEntryBuilder {
     for (Comment comment : regulations) {
       List<CommentText> texts = ((EnzymeRegulationCommentImpl) comment).getTexts();
       for (CommentText text : texts) {
-        Map<String, Object> textToPublications = new HashMap<>();
-        textToPublications.put("text", text.getValue());
-        textToPublications.put("evidences", getEvidences(text.getEvidenceIds()));
-        this.enzymeRegulations.add(textToPublications);
+        List<EvidenceDescription> evidences = getEvidences(text.getEvidenceIds());
+        this.enzymeRegulations.add(new EnzymeRegulationDescription(text.getValue(), evidences));
       }
     }
     return this;
@@ -113,30 +112,23 @@ public class UniProtEntryBuilder {
 
   public UniProtEntryBuilder withCofactors(UniProtEntry entry) {
     List<Comment> comments = entry.getComments(CommentType.COFACTOR);
-    List<Map<String, Object>> cofactorList = new ArrayList<>();
+    List<CofactorDescription> cofactorList = new ArrayList<>();
     for (Comment comment : comments) {
       for (Cofactor cofactor : ((CofactorCommentStructuredImpl) comment).getCofactors()) {
-        Map<String, Object> inner = new HashMap<>();
-        inner.put("value", cofactor.getName());
-        List<Map<String, String>> xrefs = new ArrayList<>();
-        xrefs.add(new HashMap<String, String>(){{
-          put("Id", cofactor.getCofactorReference().getReferenceId());
-          put("name", cofactor.getCofactorReference().getCofactorReferenceType().name());
-        }});
-        inner.put("xrefs", xrefs);
-        inner.put("evidences", getEvidences(cofactor.getEvidenceIds()));
-        cofactorList.add(inner);
+        List<CrossRefDescription> xrefs = new ArrayList<>();
+        xrefs.add(new CrossRefDescription(
+            cofactor.getCofactorReference().getReferenceId(),
+            cofactor.getCofactorReference().getCofactorReferenceType().name()));
+        String value = cofactor.getName();
+        List<EvidenceDescription> evidences = getEvidences(cofactor.getEvidenceIds());
+        cofactorList.add(new CofactorDescription(value, evidences, xrefs));
       }
-      this.cofactorGroup.put("cofactors", cofactorList);
-
-      List<Map<String, Object>> notes = new ArrayList<>();
+      List<NoteDescription> notes = new ArrayList<>();
       for (EvidencedValue ev : ((CofactorCommentStructuredImpl) comment).getNote().getTexts()) {
-        Map<String, Object> map = new HashMap<>();
-        map.put("text", ev.getValue());
-        map.put("evidences", getEvidences(ev.getEvidenceIds()));
-        notes.add(map);
+        List<EvidenceDescription> evidences = getEvidences(ev.getEvidenceIds());
+        notes.add(new NoteDescription(ev.getValue(), evidences));
       }
-      this.cofactorGroup.put("notes", notes);
+      this.cofactorGroup = new CofactorGroupDescription(cofactorList, notes);
     }
     return this;
   }
@@ -145,7 +137,7 @@ public class UniProtEntryBuilder {
     return new OTARUniProtEntry(
         Id,
         accession,
-        complexIds,
+        complexes,
         functions,
         catalyticActivities,
         enzymeRegulations,
@@ -153,25 +145,23 @@ public class UniProtEntryBuilder {
         cofactorGroup);
   }
 
-  private List<Map<String, String>> getEvidences(List<EvidenceId> evidenceIds) {
-    List<Map<String, String>> evidences = new ArrayList<>();
+  private List<EvidenceDescription> getEvidences(List<EvidenceId> evidenceIds) {
+    List<EvidenceDescription> evidences = new ArrayList<>();
     for (EvidenceId evidence : evidenceIds) {
-      Map<String, String> map = new HashMap<>();
-      map.put("code", evidence.getEvidenceCode().getCodeValue());
-      map.put("sourceName", evidence.getTypeValue());
-      map.put("sourceId", evidence.getAttribute().getValue());
-      evidences.add(map);
+      String code = evidence.getEvidenceCode().getCodeValue();
+      String name = evidence.getTypeValue();
+      String Id = evidence.getAttribute().getValue();
+      evidences.add(new EvidenceDescription(code, Id, name));
     }
     return evidences;
   }
 
-  private List<Map<String, String>> getReferences(List<ReactionReference> references) {
-    List<Map<String, String>> xrefs = new ArrayList<>();
+  private List<CrossRefDescription> getReferences(List<ReactionReference> references) {
+    List<CrossRefDescription> xrefs = new ArrayList<>();
     for (ReactionReference reference : references) {
-      Map<String, String> ref = new HashMap<>();
-      ref.put("Id", reference.getId());
-      ref.put("name", reference.getType().name());
-      xrefs.add(ref);
+      String Id = reference.getId();
+      String name = reference.getType().name();
+      xrefs.add(new CrossRefDescription(Id, name));
     }
     return xrefs;
   }
