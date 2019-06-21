@@ -20,7 +20,7 @@ public class OTARProteinEntry {
   private String accession;
   @JsonUnwrapped private BiophysicochemicalProperties biophysicochemicalProperties;
   @JsonUnwrapped private ProteinFunctions functions;
-  @JsonUnwrapped private Complexes complexIds;
+  @JsonUnwrapped private Complexes complexes;
   @JsonUnwrapped private EnzymeRegulations enzymeRegulations;
   @JsonUnwrapped private CatalyticActivities catalyticAcitivities;
   @JsonUnwrapped private OTARProteinFamilies families;
@@ -30,7 +30,7 @@ public class OTARProteinEntry {
   public static class Builder {
     private String Id;
     private String accession;
-    private List<String> complexIds = new ArrayList<>();
+    private List<Map<String, String>> complexes = new ArrayList<>();
     private List<CatalyticActivityDescription> activities = new ArrayList<>();
     private List<FunctionDescription> functions = new ArrayList<>();
     private List<EnzymeRegulationDescription> enzymeRegulations = new ArrayList<>();
@@ -48,8 +48,8 @@ public class OTARProteinEntry {
       return this;
     }
 
-    public Builder withComplexIds(List<String> complexIds) {
-      this.complexIds.addAll(complexIds);
+    public Builder withComplexes(List<Map<String, String>> complexes) {
+      this.complexes.addAll(complexes);
       return this;
     }
 
@@ -84,7 +84,7 @@ public class OTARProteinEntry {
       entry.accession = this.accession;
       entry.biophysicochemicalProperties = BiophysicochemicalProperties.from(this.bpcProperties);
       entry.functions = ProteinFunctions.from(this.functions);
-      entry.complexIds = Complexes.from(this.complexIds);
+      entry.complexes = Complexes.from(this.complexes);
       entry.enzymeRegulations = EnzymeRegulations.from(this.enzymeRegulations);
       entry.catalyticAcitivities = CatalyticActivities.from(this.activities);
       entry.cofactorGroups = CofactorGroup.from(this.cofactorGroup);

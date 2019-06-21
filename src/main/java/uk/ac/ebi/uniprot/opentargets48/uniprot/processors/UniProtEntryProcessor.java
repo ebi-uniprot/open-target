@@ -35,7 +35,7 @@ public class UniProtEntryProcessor implements ItemProcessor<OTARUniProtEntry, OT
     OTARProteinEntry.Builder builder =
         new OTARProteinEntry.Builder(entry.getId(), entry.getAccession())
             .withFunctions(entry.getFunctions())
-            .withComplexIds(entry.getComplexIds())
+            .withComplexes(entry.getComplexes())
             .withActivities(entry.getCatalyticActivities())
             .withEnzymeRegulations(entry.getEnzymeRegulations())
             .withBpcProperties(entry.getBpcProperties())

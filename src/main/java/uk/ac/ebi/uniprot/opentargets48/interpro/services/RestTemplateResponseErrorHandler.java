@@ -19,7 +19,7 @@ public class RestTemplateResponseErrorHandler implements ResponseErrorHandler {
   }
 
   @Override
-  public void handleError( ClientHttpResponse httpResponse) throws IOException {
+  public void handleError(ClientHttpResponse httpResponse) throws IOException {
     HttpStatus.Series statusCode = httpResponse.getStatusCode().series();
     if (statusCode == HttpStatus.Series.SERVER_ERROR) {
       log.error("Server error");

@@ -7,4 +7,5 @@ import lombok.Data;
 @Data
 public class Complex {
   private final String Id;
+  private final String description;
 }

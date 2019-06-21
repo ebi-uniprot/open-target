@@ -1,6 +1,8 @@
 package uk.ac.ebi.uniprot.opentargets48.uniprot;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
@@ -32,7 +34,6 @@ public class UniProtConfig {
   public static final int DEFAULT_CHUNK_SIZE = 50;
   public static final String JOB_NAME = "processEntriesJob";
   public static final String STEP_NAME = "processEntriesStep";
-  public static final String JSON_FILE_NAME = "proteins.json";
 
   @Value("${spring.batch.outDir}")
   private String outDir;
@@ -67,7 +68,7 @@ public class UniProtConfig {
   protected UniProtEntryReader itemReader() {
     ServiceFactory serviceFactoryInstance = Client.getServiceFactoryInstance();
     return new UniProtEntryReader(
-        serviceFactoryInstance.getUniProtQueryService(), getRetryStrategy());
+        serviceFactoryInstance.getUniProtQueryService(), getRetryStrategy(), getRetryStrategy());
   }
 
   @Bean
@@ -78,7 +79,9 @@ public class UniProtConfig {
 
   @Bean
   public JsonItemWriter jsonFileItemWriter() {
-    Resource output = new FileSystemResource(new File(outDir + JSON_FILE_NAME));
+    String fileName = new SimpleDateFormat("yyyyMMdd'.json'").format(new Date());
+    fileName = "OTAR02-48-" + fileName;
+    Resource output = new FileSystemResource(new File(outDir + fileName));
     return new JsonItemWriter(output, new JacksonJsonObjectMarshaller<>());
   }
 

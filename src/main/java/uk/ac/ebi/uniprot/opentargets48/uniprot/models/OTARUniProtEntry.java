@@ -8,7 +8,7 @@ import lombok.Data;
 public class OTARUniProtEntry {
   private final String Id;
   private final String accession;
-  private final List<String> complexIds;
+  private final List<Map<String, String>> complexes;
   private final List<FunctionDescription> functions;
   private final List<CatalyticActivityDescription> catalyticActivities;
   private final List<EnzymeRegulationDescription> enzymeRegulations;

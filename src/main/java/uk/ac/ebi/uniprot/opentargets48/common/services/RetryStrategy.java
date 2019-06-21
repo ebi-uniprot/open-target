@@ -11,10 +11,15 @@ import org.springframework.stereotype.Service;
 public class RetryStrategy<T> {
   private final RetryTemplate template;
   private final SimpleRetryPolicy policy;
+  public static final int DEFAULT_RETRY_COUNT = 3;
 
   public RetryStrategy() {
+    this(DEFAULT_RETRY_COUNT);
+  }
+
+  public RetryStrategy(int retryCount) {
     this.policy = new SimpleRetryPolicy();
-    this.policy.setMaxAttempts(5);
+    this.policy.setMaxAttempts(retryCount);
     this.template = new RetryTemplate();
     this.template.setRetryPolicy(policy);
   }

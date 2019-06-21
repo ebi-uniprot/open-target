@@ -25,7 +25,7 @@ import uk.ac.ebi.kraken.model.uniprot.comments.KineticParametersImpl;
 public class UniProtEntryBuilder {
   private String Id;
   private String accession;
-  private List<String> complexIds = new ArrayList<>();
+  private List<Map<String, String>> complexes = new ArrayList<>();
   private List<FunctionDescription> functions = new ArrayList<>();
   private List<CatalyticActivityDescription> catalyticActivities = new ArrayList<>();
   private List<EnzymeRegulationDescription> enzymeRegulations = new ArrayList<>();
@@ -50,7 +50,10 @@ public class UniProtEntryBuilder {
     List<DatabaseCrossReference> references =
         entry.getDatabaseCrossReferences(DatabaseType.COMPLEXPORTAL);
     for (DatabaseCrossReference r : references) {
-      this.complexIds.add(r.getPrimaryId().toString());
+      Map<String, String> complex = new HashMap<>();
+      complex.put("Id", r.getPrimaryId().toString());
+      complex.put("description", r.getDescription().toString());
+      this.complexes.add(complex);
     }
     return this;
   }
@@ -134,7 +137,7 @@ public class UniProtEntryBuilder {
     return new OTARUniProtEntry(
         Id,
         accession,
-        complexIds,
+        complexes,
         functions,
         catalyticActivities,
         enzymeRegulations,
