@@ -26,14 +26,7 @@ public class ProteinFamily {
   public static ProteinFamily from(Result result) {
     String accession = result.getMetadata().getAccession();
     List<String> descriptions = result.getExtra_fields().getDescription();
-    /*
-    List<String> descriptions = Arrays.asList(
-        "<p>",
-          "This is",
-          "<div>Hello [<cite id=\"1234\" />]</div>",
-          "World [<cite id=\"1235\" />]",
-        "</p>");
-     */
+
     List<EvidenceDescription> evidences = new ArrayList<>();
     LinkedHashMap<String, Object> literature = result.getExtra_fields().getLiterature();
     Map<String, String> codeToPMId = new HashMap<>();

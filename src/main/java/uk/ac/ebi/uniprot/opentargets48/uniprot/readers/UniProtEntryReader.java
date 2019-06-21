@@ -59,8 +59,7 @@ public class UniProtEntryReader implements ItemReader<OTARUniProtEntry> {
                 .or(UniProtQueryBuilder.comments(CommentType.FUNCTION, "*"))
                 .or(UniProtQueryBuilder.comments(CommentType.CATALYTIC_ACTIVITY, "*"))
                 .or(UniProtQueryBuilder.comments(CommentType.BIOPHYSICOCHEMICAL_PROPERTIES, "*")))
-        .and(UniProtQueryBuilder.swissprot())
-        .and(UniProtQueryBuilder.accession("P69892"));
+        .and(UniProtQueryBuilder.swissprot());
   }
 
   private Iterator<UniProtEntry> entries() {
